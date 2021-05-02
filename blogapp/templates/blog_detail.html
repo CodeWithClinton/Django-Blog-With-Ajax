@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+  <!-- Page Content -->
+  {% block content %}
+  <div class="container">
+
+    <div class="row">
+
+      <!-- Post Content Column -->
+      <div class="col-lg-8">
+
+        <!-- Title -->
+        <h1 class="mt-4">{{post.title}}</h1>
+
+        <!-- Author -->
+        <p class="lead">
+          by
+          <a href="#">{{post.user}}</a>
+        </p>
+
+        <hr>
+
+        <!-- Date/Time -->
+        <p>Posted on {{post.created_on}}</p>
+
+        <hr>
+
+        <!-- Preview Image -->
+        <img class="img-fluid rounded" src="{{post.image.url}}" alt="">
+
+        <hr>
+
+        <!-- Post Content -->
+        <p>{{post.body}}</p>
+        <hr>
+
+        <!-- Comments Form -->
+        <div class="card my-4">
+          <h5 class="card-header">Leave a Comment:</h5>
+          <div class="card-body">
+            <form method="POST" id = "commentForm">
+              {% csrf_token %}
+              {{form.author}}
+              <br>
+              {{form.body}}
+              <br>
+              <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+          </div>
+        </div>
+       
+
+        <!-- Single Comment -->
+        
+        <div class="media mb-4">
+          <img class="d-flex mr-3 rounded-circle" src="http://placehold.it/50x50" alt="">
+          <div class="media-body" id = 'media-body'>
+            <h5 class="mt-0" id = 'commenter'>{{comment.author}}</h5>
+           <p id = 'comment'>{{comment.body}}</p>
+          </div>
+        </div>
+        
+      </div>
+      <script>
+        let form = document.getElementById('commentForm')
+        let commentContainer = document.getElementById('media-body')
+        
+        form.addEventListener('submit', stopReload)
+        function stopReload(e){
+          e.preventDefault()
+          let commenter = document.createElement('h5')
+          let comment = document.createElement('p')
+          commenter.classList.add('mt-0')
+          $.ajax({
+            type: "POST",
+            url: "{% url 'blog_detail' post.slug %}",
+            data: $("#commentForm").serialize(),
+            datatype: "json",
+            success: function(data){
+              commenter.innerText = data.commenter
+              comment.innerText = data.msg
+              commentContainer.appendChild(commenter)
+              commentContainer.appendChild(comment)
+              form.reset()
+            }
+          })
+        }
+      </script>
+{% endblock %}
